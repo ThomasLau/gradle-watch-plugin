@@ -25,6 +25,7 @@ public class WatchTarget implements Named {
     private String name;
     private List<FileCollection> fileCollections = new ArrayList<>();
     private List<String> tasks = new ArrayList<>();
+    private List<String> ignores = new ArrayList<>();
 
     public WatchTarget(String name) {
         this.name = name;
@@ -45,6 +46,10 @@ public class WatchTarget implements Named {
 
     public void tasks(String... tasks) {
         addAll(this.tasks, tasks);
+    }
+
+    public void ignores(String... ignores) {
+        addAll(this.ignores, ignores);
     }
 
 //  ------------------------------------------------------------- package private
@@ -75,6 +80,12 @@ public class WatchTarget implements Named {
         long lastModified = f.lastModified();
         if (0 < lastModified && lastModified <= executedAt) {
             return false;
+        }
+
+        for (String regex:ignores) {
+            if (path.toString().matches(regex)) {
+                return false;
+            }
         }
 
         for (FileCollection fileCollection : fileCollections) {
